@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ESP32 Sensor Data</title>
+    <link href="https://fonts.googleapis.com/css?family=Roboto:400,700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <style>
+        body {
+            font-family: 'Roboto', sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #ebb1b1, #d7ebcf); /* ใช้ gradient background */
+            color: #343a40;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+        .container {
+            max-width: 800px;
+            width: 100%;
+            background-color: rgba(255, 255, 255, 0.9); /* ทำให้พื้นหลังมีความโปร่งแสง */
+            border-radius: 8px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+            padding: 20px 30px; /* เพิ่ม padding */
+            position: relative;
+            overflow: hidden;
+        }
+        h1 {
+            text-align: center;
+            color: #000000;
+            margin-bottom: 20px;
+            font-size: 2.5rem;
+            text-shadow: 1px 1px 10px rgba(0, 0, 0, 0.2);
+        }
+        .icon {
+            font-size: 4rem;
+            color: #000000;
+            display: block;
+            text-align: center;
+            margin-bottom: 15px;
+            animation: bounce 2s infinite;
+        }
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% {
+                transform: translateY(0);
+            }
+            40% {
+                transform: translateY(-10px);
+            }
+            60% {
+                transform: translateY(-5px);
+            }
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            transition: 0.3s;
+        }
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border: 1px solid #dee2e6;
+            border-radius: 5px;
+        }
+        th {
+            background-color: #d888c4;
+            color: white;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        tbody tr {
+            transition: background-color 0.3s, transform 0.3s;
+        }
+        tbody tr:nth-child(odd) {
+            background-color: #f9f9f9; /* สีพื้นหลังของแถวที่เป็นเลขคี่ */
+        }
+        tbody tr:nth-child(even) {
+            background-color: #f1f1f1; /* สีพื้นหลังของแถวที่เป็นเลขคู่ */
+        }
+        tbody tr:hover {
+            background-color: #e0e0e0; /* สีพื้นหลังเมื่อ hover */
+            transform: scale(1.02);
+        }
+
+        @media (max-width: 600px) {
+            th, td {
+                display: block;
+                width: 100%;
+            }
+            th {
+                position: absolute;
+                left: -9999px;
+            }
+            tr {
+                margin-bottom: 20px;
+            }
+            td {
+                border: none;
+                position: relative;
+                padding-left: 50%;
+            }
+            td:before {
+                position: absolute;
+                left: 10px;
+                white-space: nowrap;
+                font-weight: bold;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>ESP32 Sensor Data</h1>
+        <i class="fas fa-thermometer-half icon"></i>
+        <table>
+            <thead>
+                <tr>
+                    <th>Temperature (°C)</th>
+                    <th>Humidity (%)</th>
+                    <th>Timestamp</th>
+                </tr>
+            </thead>
+            <tbody id="data-table-body">
+                <!-- Data will be populated here -->
+            </tbody>
+        </table>
+    </div>
+
+    <script>
+        // Function to fetch data from the Express API
+        async function fetchData() {
+            try {
+                const response = await fetch('/api/data'); // Endpoint of the Express API
+                if (!response.ok) throw new Error('Network response was not ok');
+                
+                const data = await response.json();
+                const tableBody = document.getElementById('data-table-body');
+                tableBody.innerHTML = ''; // Clear existing rows
+
+                // Populate table with data
+                data.forEach(item => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${item.temperature}</td>
+                        <td>${item.humidity}</td>
+                        <td>${new Date(item.timestamp).toLocaleString()}</td>
+                    `;
+                    tableBody.appendChild(row);
+                });
+            } catch (error) {
+                console.error('Error fetching data:', error);
+            }
+        }
+
+        // Call fetchData on page load
+        document.addEventListener('DOMContentLoaded', fetchData);
+    </script>
+</body>
+</html>
